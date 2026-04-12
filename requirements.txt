@@ -1,0 +1,6 @@
+aiogram
+sentence-transformers
+chromadb
+pypdf
+pymupdf
+google-generativeai
