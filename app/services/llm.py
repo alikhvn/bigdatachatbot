@@ -1,9 +1,7 @@
-import google.generativeai as genai
+from google.genai import Client
 from app.config.settings import GEMINI_API_KEY
 
-genai.configure(api_key=GEMINI_API_KEY)
-
-model = genai.GenerativeModel("gemini-2.5-flash")
+client = Client(api_key=GEMINI_API_KEY)
 
 
 def ask_gemini(context: str, question: str):
@@ -17,5 +15,13 @@ def ask_gemini(context: str, question: str):
 ВОПРОС:
 {question}
 """
-    response = model.generate_content(prompt)
-    return response.text
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+
+    # Получаем количество токенов из метаданных
+    tokens = response.usage_metadata.total_token_count if response.usage_metadata else 0
+
+    return response.text, tokens

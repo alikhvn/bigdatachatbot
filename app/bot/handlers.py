@@ -1,3 +1,4 @@
+import asyncio
 from aiogram import Router, types
 from aiogram.filters import CommandStart
 
@@ -16,21 +17,29 @@ async def start(message: types.Message):
 @router.message()
 async def handle(message: types.Message):
 
+    await message.bot.send_chat_action(
+        chat_id=message.chat.id,
+        action="typing"
+    )
+
+    loader = await message.answer(
+        "⏳ Іздеп жатырмын..."
+    )
+
     question = message.text
 
-    # 1. поиск
-    texts, sources = search(question)
-
+    texts, sources = await asyncio.to_thread(search, question)
     context = "\n\n".join(texts)
 
-    # 2. ответ от Gemini
-    answer = ask_gemini(context, question)
+    answer, tokens = await asyncio.to_thread(ask_gemini, context, question)
 
-    # 3. добавляем источники вручную
     unique_sources = list(set(sources))
-
     sources_text = "\n".join([f"📄 {s}" for s in unique_sources])
 
-    final_answer = f"{answer}\n\n📚 Дереккөз:\n{sources_text}"
+    final_answer = (
+        f"{answer}\n\n"
+        f"📚 <b>Дереккөз:</b>\n{sources_text}\n\n"
+        f"🤖 <i>Токенов использовано: {tokens}</i>"
+    )
 
-    await message.answer(final_answer, parse_mode="HTML")
+    await loader.edit_text(final_answer, parse_mode="HTML")
