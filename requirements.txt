@@ -4,3 +4,4 @@ chromadb
 pypdf
 pymupdf
 google-generativeai
+gunicorn
