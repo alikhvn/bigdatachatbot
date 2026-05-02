@@ -1,5 +1,6 @@
 import asyncio
 import threading
+import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from app.main import main
 
@@ -9,15 +10,18 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b"OK")
 
-def run_server():
-    port = 10000  
-    server = HTTPServer(("", port), Handler)
+def start_http():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), Handler)
+    print(f"Server running on port {port}")
     server.serve_forever()
 
-def run_async():
+def start_async():
     asyncio.run(main())
 
 if __name__ == "__main__":
-    threading.Thread(target=run_server).start()
+    # HTTP сервер в отдельном потоке
+    threading.Thread(target=start_http).start()
 
-    run_async()
+    # твоя логика
+    start_async()
